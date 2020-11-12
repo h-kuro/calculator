@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
 
@@ -18,7 +20,15 @@ public class Main {
             e.printStackTrace();
         }
 
-        System.out.println(Integer.parseInt(inputString));
-        System.out.println(Integer.toString(1));
+        Pattern pattern = Pattern.compile("[0-9]+|([^0-9])");
+        Matcher matcher = pattern.matcher(inputString);
+        int groupCount = matcher.groupCount();
+
+        while (matcher.find()) {
+            for (int i = 0; i< groupCount; i++){
+                System.out.println(matcher.group(i));
+            }
+        }
+
     }
 }
