@@ -18,7 +18,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        System.out.println(inputString);
-
+        System.out.println(Integer.parseInt(inputString));
+        System.out.println(Integer.toString(1));
     }
 }
