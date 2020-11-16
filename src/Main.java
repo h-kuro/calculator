@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,15 +29,27 @@ public class Main {
 
             if (inputString.equals("end")) break;
 
-            Pattern pattern = Pattern.compile("[0-9]+|([^0-9])");
+            Pattern pattern = Pattern.compile("([0-9]+)|[^0-9]");
             Matcher matcher = pattern.matcher(inputString);
             int groupCount = matcher.groupCount();
 
             ArrayList<String> elements = new ArrayList<String>();
 
+            String last = "";
+            boolean sign = false;
             while (matcher.find()) {
                 for (int i = 0; i < groupCount; i++) {
-                    elements.add(matcher.group(i));
+                    if ((last.equals("") || Arrays.asList(operators).contains(last)) && matcher.group(i).equals("-")) {
+                        sign = true;
+                    } else if (sign) {
+                        elements.add('-' + matcher.group(i));
+                        sign = false;
+                    } else if (matcher.group(i).equals(".") || last.equals(".")) {
+                        elements.set(elements.size() - 1, elements.get(elements.size() - 1) + matcher.group(i));
+                    } else {
+                        elements.add(matcher.group(i));
+                    }
+                    last = matcher.group(i);
                 }
             }
 
@@ -48,21 +61,24 @@ public class Main {
             }
 
             if (operatorPoint == 2147483647) {
-                System.out.println("式を入力してください");
+                System.out.println("式エラー");
                 continue;
             }
 
-            switch (elements.get(operatorPoint)) {
-                case "+" -> elements.set(operatorPoint, String.valueOf(Integer.parseInt(elements.get(operatorPoint - 1)) + Integer.parseInt(elements.get(operatorPoint + 1))));
-                case "-" -> elements.set(operatorPoint, String.valueOf(Integer.parseInt(elements.get(operatorPoint - 1)) - Integer.parseInt(elements.get(operatorPoint + 1))));
-                case "*" -> elements.set(operatorPoint, String.valueOf(Integer.parseInt(elements.get(operatorPoint - 1)) * Integer.parseInt(elements.get(operatorPoint + 1))));
-                case "/" -> {
-                    if (Integer.parseInt(elements.get(operatorPoint + 1)) == 0) {
-                        elements.set(operatorPoint, "0除算エラー");
-                        break;
-                    }
-                    elements.set(operatorPoint, String.valueOf(Integer.parseInt(elements.get(operatorPoint - 1)) / Integer.parseInt(elements.get(operatorPoint + 1))));
-                }
+            if (elements.get(operatorPoint - 1).contains(".") || elements.get(operatorPoint + 1).contains(".")) {
+                elements.set(operatorPoint,
+                        calculation(
+                                Double.parseDouble(elements.get(operatorPoint - 1)),
+                                Double.parseDouble(elements.get(operatorPoint + 1)),
+                                elements.get(operatorPoint)
+                        ));
+            } else {
+                elements.set(operatorPoint,
+                        calculation(
+                                Integer.parseInt(elements.get(operatorPoint - 1)),
+                                Integer.parseInt(elements.get(operatorPoint + 1)),
+                                elements.get(operatorPoint)
+                        ));
             }
 
             elements.remove(operatorPoint + 1);
@@ -76,5 +92,42 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("終了");
+    }
+
+    private static String calculation(int a, int b, String operator) {
+        String result = "";
+        switch (operator) {
+            case "+" -> result = String.valueOf(a + b);
+            case "-" -> result = String.valueOf(a - b);
+            case "*" -> result = String.valueOf(a * b);
+            case "/" -> {
+                if (b == 0) {
+                    result = "0除算エラー";
+                    break;
+                }
+                result = String.valueOf(a / b);
+            }
+            default -> result = "式エラー";
+        }
+        return result;
+    }
+
+    private static String calculation(double a, double b, String operator) {
+        String result = "";
+        switch (operator) {
+            case "+" -> result = String.valueOf(a + b);
+            case "-" -> result = String.valueOf(a - b);
+            case "*" -> result = String.valueOf(a * b);
+            case "/" -> {
+                if (b == 0) {
+                    result = "0除算エラー";
+                    break;
+                }
+                result = String.valueOf(a / b);
+            }
+            default -> result = "式エラー";
+        }
+        return result;
     }
 }
