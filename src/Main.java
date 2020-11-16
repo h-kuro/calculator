@@ -53,37 +53,37 @@ public class Main {
                 }
             }
 
-            int operatorPoint = 2147483647;
-            for (String operator : operators) {
-                int temp = elements.indexOf(operator);
-                if (temp == -1) temp = 2147483647;
-                operatorPoint = Math.min(operatorPoint, temp);
+            while (elements.size() > 1) {
+                int operatorPoint = 2147483647;
+                for (String operator : operators) {
+                    int temp = elements.indexOf(operator);
+                    if (temp == -1) temp = 2147483647;
+                    operatorPoint = Math.min(operatorPoint, temp);
+                }
+
+                if (operatorPoint == 2147483647) {
+                    System.out.println("式エラー");
+                    break;
+                }
+
+                if (elements.get(operatorPoint - 1).contains(".") || elements.get(operatorPoint + 1).contains(".")) {
+                    elements.set(operatorPoint,
+                            calculation(
+                                    Double.parseDouble(elements.get(operatorPoint - 1)),
+                                    Double.parseDouble(elements.get(operatorPoint + 1)),
+                                    elements.get(operatorPoint)
+                            ));
+                } else {
+                    elements.set(operatorPoint,
+                            calculation(
+                                    Integer.parseInt(elements.get(operatorPoint - 1)),
+                                    Integer.parseInt(elements.get(operatorPoint + 1)),
+                                    elements.get(operatorPoint)
+                            ));
+                }
+                elements.remove(operatorPoint + 1);
+                elements.remove(operatorPoint - 1);
             }
-
-            if (operatorPoint == 2147483647) {
-                System.out.println("式エラー");
-                continue;
-            }
-
-            if (elements.get(operatorPoint - 1).contains(".") || elements.get(operatorPoint + 1).contains(".")) {
-                elements.set(operatorPoint,
-                        calculation(
-                                Double.parseDouble(elements.get(operatorPoint - 1)),
-                                Double.parseDouble(elements.get(operatorPoint + 1)),
-                                elements.get(operatorPoint)
-                        ));
-            } else {
-                elements.set(operatorPoint,
-                        calculation(
-                                Integer.parseInt(elements.get(operatorPoint - 1)),
-                                Integer.parseInt(elements.get(operatorPoint + 1)),
-                                elements.get(operatorPoint)
-                        ));
-            }
-
-            elements.remove(operatorPoint + 1);
-            elements.remove(operatorPoint - 1);
-
             System.out.println(elements.get(0));
         }
         try {
