@@ -13,7 +13,7 @@ public class Main {
         InputStreamReader inputStreamReader = new InputStreamReader(System.in);
         BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        String[] operators = {"+", "-", "*", "/"};
+        String[][] operators = {{"*", "/"}, {"+", "-"}};
 
         while (true) {
             System.out.print("式:");
@@ -33,13 +33,14 @@ public class Main {
             Matcher matcher = pattern.matcher(inputString);
             int groupCount = matcher.groupCount();
 
-            ArrayList<String> elements = new ArrayList<String>();
+            ArrayList<String> elements = new ArrayList<>();
 
             String last = "";
             boolean sign = false;
             while (matcher.find()) {
                 for (int i = 0; i < groupCount; i++) {
-                    if ((last.equals("") || Arrays.asList(operators).contains(last)) && matcher.group(i).equals("-")) {
+                    if ((last.equals("") || Arrays.asList(operators[0]).contains(last)
+                            || Arrays.asList(operators[1]).contains(last)) && matcher.group(i).equals("-")) {
                         sign = true;
                     } else if (sign) {
                         elements.add('-' + matcher.group(i));
@@ -53,33 +54,45 @@ public class Main {
                 }
             }
 
+            int i = 0;
             while (elements.size() > 1) {
+
                 int operatorPoint = 2147483647;
-                for (String operator : operators) {
+                for (String operator : operators[i]) {
                     int temp = elements.indexOf(operator);
                     if (temp == -1) temp = 2147483647;
                     operatorPoint = Math.min(operatorPoint, temp);
                 }
 
                 if (operatorPoint == 2147483647) {
-                    System.out.println("式エラー");
-                    break;
+                    if (i == 0) {
+                        i++;
+                        continue;
+                    } else {
+                        elements.set(0, "式エラー");
+                        break;
+                    }
                 }
 
+                String temp;
                 if (elements.get(operatorPoint - 1).contains(".") || elements.get(operatorPoint + 1).contains(".")) {
-                    elements.set(operatorPoint,
-                            calculation(
-                                    Double.parseDouble(elements.get(operatorPoint - 1)),
-                                    Double.parseDouble(elements.get(operatorPoint + 1)),
-                                    elements.get(operatorPoint)
-                            ));
+                    temp = calculation(
+                            Double.parseDouble(elements.get(operatorPoint - 1)),
+                            Double.parseDouble(elements.get(operatorPoint + 1)),
+                            elements.get(operatorPoint)
+                    );
                 } else {
-                    elements.set(operatorPoint,
-                            calculation(
-                                    Integer.parseInt(elements.get(operatorPoint - 1)),
-                                    Integer.parseInt(elements.get(operatorPoint + 1)),
-                                    elements.get(operatorPoint)
-                            ));
+                    temp = calculation(
+                            Integer.parseInt(elements.get(operatorPoint - 1)),
+                            Integer.parseInt(elements.get(operatorPoint + 1)),
+                            elements.get(operatorPoint)
+                    );
+                }
+                if (temp.equals("式エラー") || temp.equals("0除算エラー")) {
+                    elements.set(0, temp);
+                    break;
+                } else {
+                    elements.set(operatorPoint, temp);
                 }
                 elements.remove(operatorPoint + 1);
                 elements.remove(operatorPoint - 1);
